@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     SCOUT_WAIT_UNTIL: Literal["load", "domcontentloaded", "networkidle", "commit"] = (
         "domcontentloaded"
     )
+    SCOUT_DEEP_DIVE_ENFORCE_PATH_SCOPE: bool = True
+    SCOUT_DEEP_DIVE_SCOPE_MIN_MATCHES: int = 3
+    SCOUT_DEEP_DIVE_FILTER_NOISE_URLS: bool = True
 
     class Config:
         env_file = ".env"
