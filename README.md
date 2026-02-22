@@ -74,6 +74,9 @@ curl -X POST "http://localhost:8001/v1/scout/deep-dive" \
 | :--- | :--- | :--- |
 | `MAX_CONCURRENT_CRAWLS` | 5 | 最大并发任务数 |
 | `DEFAULT_USER_AGENT` | DeetingScout/1.0 | 默认 UA |
+| `SCOUT_BROWSER_PROXY` | （空） | 浏览器代理地址（如 `http://127.0.0.1:7890` 或 `socks5://127.0.0.1:1080`） |
+| `SCOUT_PAGE_TIMEOUT_MS` | 60000 | 页面导航超时（毫秒） |
+| `SCOUT_WAIT_UNTIL` | domcontentloaded | Playwright 等待条件（`load` / `domcontentloaded` / `networkidle` / `commit`） |
 
 ## 📦 独立部署指南
 
