@@ -38,3 +38,21 @@ Disallow: /ghost/
         self.assertTrue(first)
         self.assertTrue(second)
         self.assertEqual(fetch_mock.await_count, 1)
+
+    def test_content_safe_avoids_false_positive_for_chinese_phrase(self) -> None:
+        manager = ComplianceManager(user_agent="DeetingScout/1.0")
+        text = "这个故事有出色情节和人物塑造。"
+
+        self.assertTrue(manager.is_content_safe(text))
+
+    def test_content_safe_blocks_explicit_sensitive_keyword(self) -> None:
+        manager = ComplianceManager(user_agent="DeetingScout/1.0")
+        text = "该页面包含色情内容与违规引流。"
+
+        self.assertFalse(manager.is_content_safe(text))
+
+    def test_content_safe_still_blocks_when_keyword_preceded_by_chu(self) -> None:
+        manager = ComplianceManager(user_agent="DeetingScout/1.0")
+        text = "该站点产出色情内容并进行传播。"
+
+        self.assertFalse(manager.is_content_safe(text))
