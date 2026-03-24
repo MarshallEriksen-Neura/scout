@@ -7,7 +7,6 @@ from crawl4ai import AsyncWebCrawler, BrowserConfig
 from loguru import logger
 from typing import Optional, Dict, Any
 
-from app.core.compliance import compliance_manager
 from app.core.config import settings
 
 
@@ -82,28 +81,19 @@ class CrawlerService:
             logger.info("Persistent browser instance closed.")
 
     async def inspect_url(self, url: str, js_mode: bool = True) -> Dict[str, Any]:
-        # 1. [Pre-Flight] Compliance Firewall Check
-        if not await compliance_manager.is_safe_to_crawl(url):
-            logger.error(f"⚠️  Mission Aborted: Target {url} violated safety/compliance rules.")
-            return {
-                "status": "failed",
-                "error": "Security/Compliance Violation: Target is blacklisted.",
-                "url": url
-            }
-
         logger.info(f"Scout dispatching to: {url}")
 
-        # 2. Concurrency gate – prevent too many concurrent crawls
+        # Concurrency gate – prevent too many concurrent crawls
         async with self.semaphore:
             return await self._crawl(url, js_mode)
 
     async def _crawl(self, url: str, js_mode: bool) -> Dict[str, Any]:
-        # 3. Human Behavior Simulation (Jitter)
+        # Human Behavior Simulation (Jitter)
         delay = random.uniform(1.5, 4.5)
         logger.debug(f"Applying stealth jitter: {delay:.2f}s")
         await asyncio.sleep(delay)
 
-        # 4. Execution – reuse persistent browser
+        # Execution – reuse persistent browser
         try:
             crawler = await self._get_crawler()
             logger.info(f"Reusing browser session for {url}...")
@@ -120,15 +110,6 @@ class CrawlerService:
                 return {
                     "status": "failed",
                     "error": result.error_message,
-                    "url": url
-                }
-
-            # 5. [Post-Flight] Content Safety Check
-            if not compliance_manager.is_content_safe(result.markdown):
-                logger.error(f"☢️  Content Rejected: Sensitive content detected in {url}")
-                return {
-                    "status": "failed",
-                    "error": "Security/Compliance Violation: Sensitive content detected.",
                     "url": url
                 }
 
