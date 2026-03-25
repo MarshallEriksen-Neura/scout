@@ -8,6 +8,7 @@ from loguru import logger
 from typing import Optional, Dict, Any
 
 from app.core.config import settings
+from app.services.text_normalization import normalize_crawled_markdown
 
 
 class CrawlerService:
@@ -113,14 +114,19 @@ class CrawlerService:
                     "url": url
                 }
 
-            logger.info(f"Mission success. Extracted {len(result.markdown)} chars.")
+            normalized_markdown, normalization = normalize_crawled_markdown(
+                result.markdown
+            )
+            logger.info(f"Mission success. Extracted {len(normalized_markdown)} chars.")
+            metadata = dict(result.metadata or {})
+            metadata["normalization"] = normalization
 
             return {
                 "status": "success",
                 "url": url,
-                "title": result.metadata.get("title", "Untitled"),
-                "markdown": result.markdown,
-                "metadata": result.metadata,
+                "title": metadata.get("title", "Untitled"),
+                "markdown": normalized_markdown,
+                "metadata": metadata,
                 "links": result.links
             }
         except Exception as e:

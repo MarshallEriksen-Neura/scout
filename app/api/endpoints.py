@@ -14,6 +14,7 @@ class ScoutRequest(BaseModel):
 
 class ScoutResponse(BaseModel):
     status: str
+    title: str | None = None
     markdown: str | None = None
     metadata: dict | None = None
     error: str | None = None
@@ -34,14 +35,16 @@ async def inspect_target(request: ScoutRequest):
         
         if result["status"] == "failed":
             return ScoutResponse(status="failed", error=result.get("error"))
-            
+
+        metadata = dict(result.get("metadata") or {})
+        metadata["media_count"] = len(result.get("media", []))
+        metadata["link_count"] = len(result.get("links", {}).get("internal", []))
+
         return ScoutResponse(
             status="success",
+            title=result.get("title") or metadata.get("title"),
             markdown=result.get("markdown"),
-            metadata={
-                "media_count": len(result.get("media", [])),
-                "link_count": len(result.get("links", {}).get("internal", []))
-            }
+            metadata=metadata,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
